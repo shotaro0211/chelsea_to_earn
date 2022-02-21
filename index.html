@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Chelsea to Earn</title>
+    <meta name="description" content="We love Chelsea">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon.jpeg">
+    <link rel="stylesheet" href="./loader.css" />
+    <style>
+      .hide {
+        display:none;
+      }
+      .c-button {
+        appearance: none;
+        border: 0;
+        border-radius: 5px;
+        background: white;
+        color: black;
+        padding: 8px 16px;
+        font-size: 22px;
+      }
+      .c-button:hover {
+        background: grey;
+      }
+      .c-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px #cbd6ee;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  </head>
+
+  <body style="background-color: 	#00489d; color: white; font-weight: bold;">
+
+    <div style="text-align: center; font-size: 50px; margin-bottom: 40px;">Chelsea to Earn</div>
+
+    <div id="video" class="hide" style="text-align: center">
+        <iframe width="950" height="534" src="https://www.youtube.com/embed/ltgC-PG9LVI?autoplay=1&mute=1&playsinline=1?loop=1&playlist=ltgC-PG9LVI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="hide" id="connect-div" style="text-align: center">
+      <button class="c-button" onclick="buttonConnect()">Connect</button>
+    </div>
+    <div class="hide" id="get-div" style="margin-top: 50px; text-align: center">
+      <button class="c-button" onclick="buttonGet()">Win</button>
+    </div>
+    <div class="hide" id="connect-error-div" style="text-align: center">
+      error: Can't connect to Metamask
+    </div>
+    <div class="hide" id="network-error-div" style="text-align: center">
+      error: The network is not supported (only polygon in supported).
+    </div>
+    <div id="counter" class="hide" style="margin-top: 50px; text-align: center">
+      Additional Time: <span id="counter-text">300</span> seconds
+    </div>
+    <div id="loader" class="hide loader-wrap">
+      <div class="loader">Loading...</div>
+    </div>
+    <div id="get-message" class="hide" style="margin-top: 50px; text-align: center">
+      You won 1 BLUES!
+    </div>
+
+  </body>
+
+  <script>
+      var chainId = 4;
+      var myAddress;
+      var tokenAddress = "0x8C1c50B81B1671e82676D2ab74D96B01794f5980";
+      var isVertified = false;
+      var web3 = new Web3(Web3.givenProvider);
+      if (web3.currentProvider == null || web3.currentProvider.isMetaMask == false) {
+        document.getElementById("connect-error-div").classList.remove("hide");
+      } else {
+        web3.eth.getChainId().then(currentChainId => {
+          if (currentChainId != chainId) {
+            document.getElementById("network-error-div").classList.remove("hide");
+          } else {
+            fetch('./ERC20.json')
+              .then(response => response.json())
+              .then(data => {
+                tokenContract = new web3.eth.Contract(data, tokenAddress);
+                    web3.eth.getAccounts().then(e => {
+                      console.log("myAddress:" + e);
+                      if (e.length > 0) {
+                        myAddress = e[0]
+                        document.getElementById("video").classList.remove("hide");
+                        document.getElementById("counter").classList.remove("hide");
+
+                        var timer;
+                        var seconds = 0;
+                        var log = function(){
+                            seconds += 1;
+                            document.getElementById("counter-text").innerHTML = 300 - seconds;
+                            if (seconds >= 3 && isVertified == false) {
+                              document.getElementById("counter").classList.add("hide");
+                              document.getElementById("get-div").classList.remove("hide");
+                            }
+                            console.log(seconds);
+                        };
+
+                        timer = setInterval(log, 1000);
+                        document.addEventListener('webkitvisibilitychange', function(){
+                            if ( document.webkitHidden ) {
+                                clearTimeout(timer);
+                            } else {
+                                timer = setInterval(log, 1000);
+                            }
+                        }, false);
+                      } else {
+                        document.getElementById("connect-div").classList.remove("hide");
+                      }
+                    });
+                  }
+                );
+          }
+        });
+      }
+
+      const buttonConnect = async() => {
+        window.ethereum.request({ method: 'eth_requestAccounts' }).then(result => {
+          location.reload()
+        });
+      };
+
+      const buttonGet = async() => {
+        tokenContract.methods.give().send({from: myAddress}).then(result => {
+          document.getElementById("loader").classList.add("hide");
+          document.getElementById("get-div").classList.add("hide");
+          document.getElementById("get-message").classList.remove("hide");
+          isVertified = true;
+        });
+        document.getElementById("loader").classList.remove("hide");
+      };
+  </script>
+</html>
