@@ -52,7 +52,7 @@
       error: The network is not supported (only Rinkeby in supported).
     </div>
     <div id="counter" class="hide" style="margin-top: 50px; text-align: center">
-      Additional Time: <span id="counter-text">300</span> seconds
+      Additional Time: <span id="counter-text">60</span> seconds
     </div>
     <div id="loader" class="hide loader-wrap">
       <div class="loader">Loading...</div>
@@ -67,6 +67,7 @@
       var chainId = 4;
       var myAddress;
       var tokenAddress = "0x8C1c50B81B1671e82676D2ab74D96B01794f5980";
+      var additionalTime = 60;
       var isVertified = false;
       var web3 = new Web3(Web3.givenProvider);
       if (web3.currentProvider == null || web3.currentProvider.isMetaMask == false) {
@@ -91,8 +92,8 @@
                         var seconds = 0;
                         var log = function(){
                             seconds += 1;
-                            document.getElementById("counter-text").innerHTML = 300 - seconds;
-                            if (seconds >= 300 && isVertified == false) {
+                            document.getElementById("counter-text").innerHTML = additionalTime - seconds;
+                            if (seconds >= additionalTime && isVertified == false) {
                               document.getElementById("counter").classList.add("hide");
                               document.getElementById("get-div").classList.remove("hide");
                             }
